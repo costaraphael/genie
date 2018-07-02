@@ -1,5 +1,7 @@
 defmodule Genie do
-  @moduledoc false
+  @moduledoc """
+  Contains all the functions that are needed to interface with the libray.
+  """
 
   defstruct [:store]
 

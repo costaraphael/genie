@@ -1,11 +1,13 @@
 # Genie
 
-**TODO: Add description**
+An inference engine written 100% in Elixir.
+
+**Important**: The API is highly unstable right now. If you want a more stable solution you should look
+somewhere else right now or wait until the API is stable (version 1.0.0). 
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `genie` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `genie` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -15,7 +17,5 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/genie](https://hexdocs.pm/genie).
+The docs can be found at [https://hexdocs.pm/genie](https://hexdocs.pm/genie).
 
