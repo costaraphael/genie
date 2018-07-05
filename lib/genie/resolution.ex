@@ -9,13 +9,9 @@ defmodule Genie.Resolution do
     %Resolution{}
   end
 
-  def take(resolution, facts) do
-    values = Enum.map(facts, &Map.get(resolution.facts, &1))
-
-    if Enum.any?(values, &is_nil/1) do
-      :error
-    else
-      {:ok, facts |> Enum.zip(values) |> Map.new()}
+  def take(resolution, wanted_facts) do
+    with {:ok, values} <- take_values(resolution.facts, wanted_facts, []) do
+      {:ok, wanted_facts |> Enum.zip(values) |> Map.new()}
     end
   end
 
@@ -23,5 +19,12 @@ defmodule Genie.Resolution do
     Enum.reduce(facts, resolution, fn {fact, value}, resolution ->
       put_in(resolution.facts[fact], value)
     end)
+  end
+
+  defp take_values(_facts, [], values), do: {:ok, Enum.reverse(values)}
+  defp take_values(facts, [head | tail], values) do
+    with {:ok, value} <- Map.fetch(facts, head) do
+      take_values(facts, tail, [value | values])
+    end
   end
 end
