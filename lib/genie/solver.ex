@@ -29,13 +29,9 @@ defmodule Genie.Solver do
 
         :error ->
           for rule <- RuleStore.lookup(store, :provides, wanted),
-              resolution <- solve_requirements(rule, resolution, seen, store) do
-            {:ok, facts} = Resolution.take(resolution, rule.requires)
-
-            facts
-            |> rule.fun.()
-            |> Resolution.into(resolution)
-          end
+              resolution <- solve_requirements(rule, resolution, seen, store),
+              resolution <- run_rule(rule, resolution),
+              do: resolution
       end
     end
   end
@@ -47,5 +43,19 @@ defmodule Genie.Solver do
           match?({:ok, _}, Resolution.take(resolution, [required_fact])),
           do: resolution
     end)
+  end
+
+  defp run_rule(rule, resolution) do
+    {:ok, facts} = Resolution.take(resolution, rule.requires)
+
+    resolution =
+      facts
+      |> rule.fun.()
+      |> Resolution.into(resolution)
+
+    case Resolution.take(resolution, rule.requires) do
+      {:ok, _} -> [resolution]
+      :error -> []
+    end
   end
 end
