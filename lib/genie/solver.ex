@@ -53,7 +53,7 @@ defmodule Genie.Solver do
       |> rule.fun.()
       |> Resolution.into(resolution)
 
-    case Resolution.take(resolution, rule.requires) do
+    case Resolution.take(resolution, rule.provides) do
       {:ok, _} -> [resolution]
       :error -> []
     end

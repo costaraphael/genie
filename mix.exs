@@ -41,6 +41,7 @@ defmodule Genie.MixProject do
       {:uuid, "~> 1.1"},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
+      {:benchee, "~> 0.13.1", only: :dev, runtime: false},
       {:excoveralls, "~> 0.8", only: :test, runtime: false}
     ]
   end
