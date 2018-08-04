@@ -26,15 +26,16 @@ defmodule Genie.RuleParser do
   end
 
   defp find_requires({:facts, _, nil}, _acc) do
-    raise CompileError, description: """
-    Invalid usage of the `facts` variable. It should only be accessed to
-    fetch facts that your rule depends on:
+    raise CompileError,
+      description: """
+      Invalid usage of the `facts` variable. It should only be accessed to
+      fetch facts that your rule depends on:
 
-        facts.fact_a + facts.fact_b
+          facts.fact_a + facts.fact_b
 
-    You should assign it directly to another variable or pass it to a
-    function call.
-    """
+      You should assign it directly to another variable or pass it to a
+      function call.
+      """
   end
 
   defp find_requires(ast, acc) do
@@ -88,11 +89,12 @@ defmodule Genie.RuleParser do
   end
 
   defp find_provides(block) do
-    raise CompileError, description: """
-    Expected a call to `provide/1` at the end of the rule execution.
+    raise CompileError,
+      description: """
+      Expected a call to `provide/1` at the end of the rule execution.
 
-    Found: #{Macro.to_string(block)}
-    """
+      Found: #{Macro.to_string(block)}
+      """
   end
 
   defp parse_arrow_clauses(clauses) do

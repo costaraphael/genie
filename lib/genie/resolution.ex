@@ -1,30 +1,48 @@
 defmodule Genie.Resolution do
   @moduledoc false
 
-  alias Genie.Resolution
+  alias Genie.{
+    Resolution,
+    Rule
+  }
 
-  defstruct facts: %{}
+  defstruct facts: %{}, seen: MapSet.new()
 
-  def new do
-    %Resolution{}
+  def new(initial_facts \\ %{}) do
+    into(initial_facts, %Resolution{})
   end
 
-  def take(resolution, wanted_facts) do
-    with {:ok, values} <- take_values(resolution.facts, wanted_facts, []) do
-      {:ok, wanted_facts |> Enum.zip(values) |> Map.new()}
-    end
-  end
-
-  def into(facts, resolution) do
+  def into(%{} = facts, %Resolution{} = resolution) do
     Enum.reduce(facts, resolution, fn {fact, value}, resolution ->
-      put_in(resolution.facts[fact], value)
+      update_in(
+        resolution,
+        [Access.key!(:facts), Access.key(fact, MapSet.new())],
+        &MapSet.put(&1, value)
+      )
     end)
   end
 
-  defp take_values(_facts, [], values), do: {:ok, Enum.reverse(values)}
-  defp take_values(facts, [head | tail], values) do
-    with {:ok, value} <- Map.fetch(facts, head) do
-      take_values(facts, tail, [value | values])
-    end
+  def take(%Resolution{} = resolution, wanted_facts) when is_list(wanted_facts) do
+    Enum.reduce(wanted_facts, [%{}], fn fact, fact_maps ->
+      for fact_map <- fact_maps,
+          value <- Map.get(resolution.facts, fact, []),
+          do: Map.put(fact_map, fact, value)
+    end)
+  end
+
+  def seen_fact?(%Resolution{} = resolution, fact) do
+    fact in resolution.seen
+  end
+
+  def mark_fact_as_seen(%Resolution{} = resolution, fact) do
+    %Resolution{resolution | seen: MapSet.put(resolution.seen, fact)}
+  end
+
+  def seen_rule?(%Resolution{} = resolution, %Rule{} = rule) do
+    rule.id in resolution.seen
+  end
+
+  def mark_rule_as_seen(%Resolution{} = resolution, %Rule{} = rule) do
+    %Resolution{resolution | seen: MapSet.put(resolution.seen, rule.id)}
   end
 end

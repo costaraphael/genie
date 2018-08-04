@@ -8,10 +8,24 @@ defmodule Genie.ResolutionTest do
   end
 
   test "allows inserting and retrieving facts", %{resolution: resolution} do
-    assert :error = Resolution.take(resolution, [:fact_a])
+    assert [] = Resolution.take(resolution, [:fact_a])
 
-    resolution = Resolution.into(%{fact_a: :value}, resolution)
+    resolution = Resolution.into(%{fact_a: 1}, resolution)
 
-    assert {:ok, %{fact_a: :value}} = Resolution.take(resolution, [:fact_a])
+    assert [%{fact_a: 1}] = Resolution.take(resolution, [:fact_a])
+
+    resolution = Resolution.into(%{fact_a: 2}, resolution)
+
+    assert [%{fact_a: 1}, %{fact_a: 2}] = Resolution.take(resolution, [:fact_a])
+
+    resolution = Resolution.into(%{fact_a: 1}, resolution)
+
+    assert [%{fact_a: 1}, %{fact_a: 2}] = Resolution.take(resolution, [:fact_a])
+    assert [] = Resolution.take(resolution, [:fact_a, :fact_b])
+
+    resolution = Resolution.into(%{fact_b: 1}, resolution)
+
+    assert [%{fact_a: 1, fact_b: 1}, %{fact_a: 2, fact_b: 1}] =
+             Resolution.take(resolution, [:fact_a, :fact_b])
   end
 end

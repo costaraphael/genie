@@ -19,6 +19,46 @@ defmodule GenieTest do
     assert [6] = Genie.solve_for(genie, :result)
   end
 
+  test "rules are only run once per fact combination" do
+    parent = self()
+
+    Genie.init()
+    |> Genie.add_rule do
+      send(parent, {:rule, :a1})
+      provide(a: 1)
+    end
+    |> Genie.add_rule do
+      send(parent, {:rule, :a2})
+      provide(a: 2)
+    end
+    |> Genie.add_rule do
+      send(parent, {:rule, :b1})
+      provide(b: 2)
+    end
+    |> Genie.add_rule do
+      send(parent, {:rule, :b2})
+      provide(b: 5)
+    end
+    |> Genie.add_rule do
+      send(parent, {:rule, :ab})
+      provide(a: 3, b: 4)
+    end
+    |> Genie.add_rule do
+      send(parent, {:rule, :c})
+      provide(c: facts.a + facts.b)
+    end
+    |> Genie.add_rule do
+      send(parent, {:rule, :d})
+      provide(d: facts.a * facts.b)
+    end
+    |> Genie.add_rule do
+      provide(result: facts.c + facts.d)
+    end
+    |> Genie.solve_for(:result)
+
+    assert collect_received_rules() == ~w[a1 a2 ab b1 b2 c c c c c c c c c d d d d d d d d d]a
+  end
+
   test "wikipedia example" do
     genie =
       Genie.init()
@@ -51,9 +91,9 @@ defmodule GenieTest do
         provide(b: facts.a + 1)
       end
 
-    assert [5, 5, 4] = Genie.solve_for(genie, :result)
+    assert [4, 5] = Genie.solve_for(genie, :result)
 
-    assert [3] = Genie.solve_for(genie, %{b: 1}, :result)
+    assert [3, 4, 5] = Genie.solve_for(genie, %{b: 1}, :result)
   end
 
   test "deals with circular dependency" do
@@ -146,6 +186,15 @@ defmodule GenieTest do
       Genie.add_rule Genie.init() do
         provide([])
       end
+    end
+  end
+
+  defp collect_received_rules(rules \\ []) do
+    receive do
+      {:rule, rule} -> collect_received_rules([rule | rules])
+    after
+      0 ->
+        Enum.sort(rules)
     end
   end
 end
