@@ -59,6 +59,41 @@ defmodule GenieTest do
     assert collect_received_rules() == ~w[a1 a2 ab b1 b2 c c c c c c c c c d d d d d d d d d]a
   end
 
+  test "allows adding metadata to rules" do
+    genie =
+      Genie.init()
+      |> Genie.add_rule([provides: [:a], meta: [description: "Rule A"]], fn _f ->
+        %{a: 1}
+      end)
+      |> Genie.add_rule do
+        meta(description: "Rule B")
+
+        provide(b: 2)
+      end
+
+    descriptions =
+      genie
+      |> Genie.list_rules()
+      |> Enum.map(& &1.meta.description)
+      |> Enum.sort()
+
+    assert descriptions == ["Rule A", "Rule B"]
+  end
+
+  test "allows listing all the provided facts" do
+    genie =
+      Genie.init()
+      |> Genie.add_rule do
+        provide(a: 1)
+      end
+      |> Genie.add_rule do
+        provide(b: 2)
+      end
+
+    assert [:a, :b] = Genie.list_facts(genie, :provides)
+    assert [] = Genie.list_facts(genie, :requires)
+  end
+
   test "wikipedia example" do
     genie =
       Genie.init()

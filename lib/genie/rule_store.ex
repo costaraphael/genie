@@ -4,4 +4,8 @@ defprotocol Genie.RuleStore do
   def insert(store, rule)
 
   def lookup(store, type, fact)
+
+  def list_rules(store)
+
+  def list_facts(store, type)
 end

@@ -21,9 +21,19 @@ defmodule Genie.RuleStore.Map do
 
     def lookup(store, type, fact) do
       store
-      |> Map.get(type)
+      |> Map.fetch!(type)
       |> Map.get(fact, [])
       |> Enum.map(&Map.fetch!(store.rules, &1))
+    end
+
+    def list_rules(store) do
+      Map.values(store.rules)
+    end
+
+    def list_facts(store, type) do
+      store
+      |> Map.fetch!(type)
+      |> Map.keys()
     end
 
     defp update_fact_list(store, rule, type, fact_list) do

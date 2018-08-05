@@ -6,9 +6,10 @@ defmodule Genie.RuleParser do
 
     {ast, requires} = Macro.prewalk(ast, [], &find_requires/2)
     {ast, provides} = find_provides(ast)
+    {ast, meta} = Macro.prewalk(ast, [], &find_metadata/2)
 
     quote do
-      opts = [requires: unquote(requires), provides: unquote(provides)]
+      opts = [requires: unquote(requires), provides: unquote(provides), meta: unquote(meta)]
 
       Genie.add_rule(unquote(genie), opts, fn var!(facts, Genie) ->
         unquote(ast)
@@ -39,6 +40,14 @@ defmodule Genie.RuleParser do
   end
 
   defp find_requires(ast, acc) do
+    {ast, acc}
+  end
+
+  defp find_metadata({:meta, _, [meta]}, acc) do
+    {[], meta ++ acc}
+  end
+
+  defp find_metadata(ast, acc) do
     {ast, acc}
   end
 
